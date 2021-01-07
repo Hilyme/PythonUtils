@@ -1,0 +1,31 @@
+import os
+import sys
+import logging
+from logging import handlers
+
+
+def get_time_logger():
+    """  每天生成一个日志文件  文件、控制台双打印   保留指定数量日志文件 过期自动删除 """
+    # TODO 需要根据不同的系统进行切换
+    path = f'{sys.path[1]}/logs/default.log'      # windows版
+    # path = f'/usr/wk/data_sender/logs/default.log'        # linux版
+    dir_path = os.path.dirname(path)
+    if not os.path.exists(dir_path):
+        os.mkdir(dir_path)
+    datefmt = '%Y-%m-%d %H:%M:%S'
+    fmt = '%(asctime)s %(levelname)s %(filename)s[line:%(lineno)d] %(funcName)s：\n %(message)s'
+    logger = logging.getLogger()
+    format_str = logging.Formatter(fmt, datefmt)
+    # backupCount 保存日志的数量，过期自动删除
+    # when 按什么日期格式切分(这里方便测试使用的秒)
+    th = handlers.TimedRotatingFileHandler(filename=path, when='D', interval=1, backupCount=30, encoding='utf-8')
+    th.setFormatter(format_str)
+    th.setLevel(logging.INFO)
+    logger.addHandler(th)
+    logger.setLevel(logging.INFO)
+
+    console = logging.StreamHandler()
+    console.setLevel(logging.INFO)
+    console.setFormatter(format_str)
+    logger.addHandler(console)
+    return logger
